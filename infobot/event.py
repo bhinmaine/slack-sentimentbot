@@ -1,5 +1,7 @@
 import json
+import os
 
+BOT_TOKEN = os.environ['BOT_TOKEN']
 
 def receive(event, context):
     data = json.loads(event['body'])

@@ -6,7 +6,8 @@ provider:
   name: aws
   region: us-east-1
   runtime: python3.7
-
+  environment:
+    BOT_TOKEN: ${ssm:bot_token}
 functions:
   event_receive:
     handler: infobot/event.receive
