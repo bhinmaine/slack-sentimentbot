@@ -1,0 +1,23 @@
+{
+  "name": "slack-infobot",
+  "version": "1.0.0",
+  "description": "much thanks to the karmabot-tutorial person here: https://www.sentialabs.io/2018/08/16/Building-a-Slackbot-with-Serverless-Framework.html",
+  "main": "index.js",
+  "dependencies": {
+    "serverless-python-requirements": "^4.2.5"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/possiblyben/slack-infobot.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/possiblyben/slack-infobot/issues"
+  },
+  "homepage": "https://github.com/possiblyben/slack-infobot#readme"
+}

@@ -17,3 +17,9 @@ functions:
           path: event/receive
           method: post
           cors: true
+# serverless.yml
+plugins:
+  - serverless-python-requirements
+custom:
+  pythonRequirements:
+    dockerizePip: non-linux
