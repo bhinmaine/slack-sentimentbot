@@ -1,7 +1,9 @@
 import json
 import os
+from slackclient import SlackClient
 
 BOT_TOKEN = os.environ['BOT_TOKEN']
+sc = SlackClient(BOT_TOKEN)
 
 def receive(event, context):
     data = json.loads(event['body'])
