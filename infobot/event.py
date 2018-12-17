@@ -27,9 +27,11 @@ def receive(event, context):
     }
 
 def handle_message(data):
+    the_text = data["event"]["text"]
+
     # some silliness
     p = re.compile(r"ura \w*")
-    m = p.findall(data["event"]["text"])
+    m = p.findall(the_text)
     if m:
         for match in m:
             split = match.split()
@@ -38,12 +40,12 @@ def handle_message(data):
                 channel="{}".format(data["event"]["channel"]),
                 text="no, ura {0}".format(split[1])
                 )
+    
     # lets discover some factoids
     if (
-        data["event"]["text"].find("is") > 0 and
-        data["event"]["text"][-1] is not "?"
+        the_text.find("is") > 0 and
+        the_text[-1] is not "?"
     ):
-        the_text = data["event"]["text"]
         the_text_as_list = the_text.split()
         the_subject = the_text_as_list[the_text_as_list.index("is")-1]
         the_fact = the_text[the_text.find("is")+3:]
