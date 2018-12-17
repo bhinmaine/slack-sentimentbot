@@ -27,16 +27,24 @@ def receive(event, context):
     }
 
 def handle_message(data):
-    poster_user_id = data["event"]["user"]
-
-    p = re.compile(r"ura bot")
+    # some silliness
+    p = re.compile(r"ura \w*")
     m = p.findall(data["event"]["text"])
     if m:
         for match in m:
-            print(match)
-            print(poster_user_id)
+            split = match.split()
             sc.api_call(
                 "chat.postMessage",
                 channel="{}".format(data["event"]["channel"]),
-                text="no, ura bot <@{}>".format(poster_user_id)
+                text="no, ura {0}".format(split[1])
                 )
+    # lets discover some factoids
+    if (
+        data["event"]["text"].find("is") > 0 and
+        data["event"]["text"][-1] is not "?"
+    ):
+        the_text = data["event"]["text"]
+        the_text_as_list = the_text.split()
+        the_subject = the_text_as_list[the_text_as_list.index("is")-1]
+        the_fact = the_text[the_text.find("is")+3:]
+        print("the factoid: {0} is {1}".format(the_subject, the_fact))
