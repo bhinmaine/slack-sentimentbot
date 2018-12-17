@@ -1,10 +1,15 @@
 import json
 import os
 import re
+import boto3
+from boto3.dynamodb.conditions import Key
 from slackclient import SlackClient
 
 BOT_TOKEN = os.environ['BOT_TOKEN']
+FACTOID_TABLE = os.environ['FACTOID_TABLE']
 sc = SlackClient(BOT_TOKEN)
+ddb = boto3.resource('dynamodb')
+factoid_table = ddb.Table(FACTOID_TABLE)
 
 def receive(event, context):
     data = json.loads(event['body'])
@@ -49,4 +54,13 @@ def handle_message(data):
         the_text_as_list = the_text.split()
         the_subject = the_text_as_list[the_text_as_list.index("is")-1]
         the_fact = the_text[the_text.find("is")+3:]
-        print("the factoid: {0} is {1}".format(the_subject, the_fact))
+        put_factoid(the_subject, the_fact)
+
+def put_factoid(subject, fact):
+    print("the factoid: {0} is {1}".format(subject, fact))
+    item = {
+        "subject": subject.lower(),
+        "fact": fact.lower()
+    }
+    response = factoid_table.put_item(Item=item)
+    print(response)
