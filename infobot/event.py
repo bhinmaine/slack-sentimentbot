@@ -34,10 +34,34 @@ def receive(event, context):
     }
 
 def handle_message(data):
-    the_text = data["event"]["text"]
-
+    sentiment = get_sentiment(data["event"]["text"])
+    reaction = get_reaction(sentiment)
+    reaction_response = send_reaction(data["event"]["channel"], reaction, data["event"]["ts"])
+    print(reaction_response)
+    
+def get_sentiment(text):
     sentiment = comprehend.detect_sentiment(
-        Text=the_text,
+        Text=text,
         LanguageCode='en'
     )
-    print(sentiment["Sentiment"])
+    return(sentiment['Sentiment'])
+
+def get_reaction(sentiment):
+    if sentiment == "POSITIVE":
+        reaction = "thumbsup"
+    elif sentiment == "NEGATIVE":
+        reaction = "thumbsdown"
+    elif sentiment == "NEUTRAL":
+        reaction = "neutral_face"
+    elif sentiment == "MIXED":
+        reaction = "shrug"
+    return(reaction)
+
+def send_reaction(channel, reaction, timestamp):
+    response = sc.api_call(
+        "reactions.add",
+        channel=channel,
+        name=reaction,
+        timestamp=timestamp
+    )
+    return(response['ok'])
