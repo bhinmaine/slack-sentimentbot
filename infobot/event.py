@@ -17,7 +17,7 @@ featureflag_table = ddb.Table(FEATUREFLAG_TABLE)
 
 def receive(event, context):
     data = json.loads(event['body'])
-    print("Got data: {}".format(data))
+    #print("Got data: {}".format(data))
     return_body = "ok"
 
     if data["type"] == "url_verification":
@@ -36,9 +36,15 @@ def receive(event, context):
     }
 
 def handle_message(data):
+    # get the sentiment
+    sentiment = get_sentiment(data["event"]["text"])
+
+    # store the sentiment
+    store_sentiment_response = store_sentiment(sentiment, data["event"]["user"], data["event"]["ts"])
+
+    # add reactions to slack
     feature_enabled = check_feature_flag("sentiment_reactions")
     if feature_enabled:
-        sentiment = get_sentiment(data["event"]["text"])
         reaction = get_reaction(sentiment)
         reaction_response = send_reaction(data["event"]["channel"], reaction, data["event"]["ts"])
         print(reaction_response)
@@ -79,3 +85,13 @@ def check_feature_flag(feature):
         }
     )
     return(response['Item']['enabled'])
+
+def store_sentiment(sentiment, subject, timestamp):
+    response = sentiment_table.put_item(
+        Item={
+            'subject': subject,
+            'sentiment': sentiment,
+            'timestamp': timestamp
+        }
+    )
+    return(response)
