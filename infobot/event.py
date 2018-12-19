@@ -6,18 +6,18 @@ from boto3.dynamodb.conditions import Key
 from slackclient import SlackClient
 
 BOT_TOKEN = os.environ['BOT_TOKEN']
-SENTIMENT_TABLE = os.environ['SENTIMENT_TABLE']
+SENTIMENTS_TRACKER_TABLE = os.environ['SENTIMENTS_TRACKER_TABLE']
 FEATUREFLAG_TABLE = os.environ['FEATUREFLAG_TABLE']
 
 sc = SlackClient(BOT_TOKEN)
 ddb = boto3.resource('dynamodb')
 comprehend = boto3.client('comprehend')
-sentiment_table = ddb.Table(SENTIMENT_TABLE)
+sentiments_tracker_table = ddb.Table(SENTIMENTS_TRACKER_TABLE)
 featureflag_table = ddb.Table(FEATUREFLAG_TABLE)
 
 def receive(event, context):
     data = json.loads(event['body'])
-    #print("Got data: {}".format(data))
+    print("Got data: {}".format(data))
     return_body = "ok"
 
     if data["type"] == "url_verification":
@@ -40,7 +40,8 @@ def handle_message(data):
     sentiment = get_sentiment(data["event"]["text"])
 
     # store the sentiment
-    store_sentiment_response = store_sentiment(sentiment, data["event"]["user"], data["event"]["ts"])
+    store_sentiment_response = store_sentiment_count(sentiment, data["event"]["user"], data["event"]["ts"])
+    print(store_sentiment_response)
 
     # add reactions to slack
     feature_enabled = check_feature_flag("sentiment_reactions")
@@ -86,8 +87,8 @@ def check_feature_flag(feature):
     )
     return(response['Item']['enabled'])
 
-def store_sentiment(sentiment, subject, timestamp):
-    response = sentiment_table.put_item(
+def store_sentiment_count(sentiment, subject, timestamp):
+    response = sentiments_tracker_table.put_item(
         Item={
             'subject': subject,
             'sentiment': sentiment,
