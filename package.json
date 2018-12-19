@@ -4,6 +4,7 @@
   "description": "much thanks to the karmabot-tutorial person here: https://www.sentialabs.io/2018/08/16/Building-a-Slackbot-with-Serverless-Framework.html",
   "main": "index.js",
   "dependencies": {
+    "serverless": "^1.35.1",
     "serverless-python-requirements": "^4.2.5"
   },
   "devDependencies": {},
