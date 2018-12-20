@@ -1,5 +1,5 @@
 {
-  "name": "slack-infobot",
+  "name": "slack-sentimentbot",
   "version": "1.0.0",
   "description": "much thanks to the karmabot-tutorial person here: https://www.sentialabs.io/2018/08/16/Building-a-Slackbot-with-Serverless-Framework.html",
   "main": "index.js",
@@ -13,12 +13,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/possiblyben/slack-infobot.git"
+    "url": "git+https://github.com/possiblyben/slack-sentimentbot.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/possiblyben/slack-infobot/issues"
+    "url": "https://github.com/possiblyben/slack-sentimentbot/issues"
   },
-  "homepage": "https://github.com/possiblyben/slack-infobot#readme"
+  "homepage": "https://github.com/possiblyben/slack-sentimentbot#readme"
 }
