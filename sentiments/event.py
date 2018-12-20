@@ -1,6 +1,5 @@
 import json
 import os
-import re
 import boto3
 from boto3.dynamodb.conditions import Key
 from slackclient import SlackClient
