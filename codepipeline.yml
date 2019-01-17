@@ -1,17 +1,6 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: slack sentiment bot
 Parameters:
-
-  artifactBucket:
-    Description: artifact bucket
-    Default: 'slack-sentimentbot-artifacts'
-    Type: String
-
-  serverlessBucket:
-    Description: serverless artifact bucket
-    Default: 'slack-sentimentbot-serverless'
-    Type: String
-
   app:
     Description: app name
     Default: 'slack-sentimentbot'
@@ -33,7 +22,10 @@ Parameters:
     Type: String
 
 Resources:
-
+  ServerlessBucket:
+    Type: AWS::S3::Bucket
+  ArtifactBucket:
+    Type: AWS::S3::Bucket
   CodeBuild:
     Type: AWS::CodeBuild::Project
     Properties:
@@ -43,6 +35,7 @@ Resources:
       Source:
         Auth:
           Type: OAUTH
+          Resource: '{{resolve:secretsmanager:slack-sentimentbot:SecretString:github-access-token}}'
         Location: !Sub 'https://github.com/${githubUser}/${githubRepository}.git'
         Type: GITHUB
         BuildSpec: buildspec.yml
@@ -54,13 +47,12 @@ Resources:
          PrivilegedMode: true
       Artifacts:
        Type: no_artifacts
-
   CodePipeline:
     Type: AWS::CodePipeline::Pipeline
     Properties:
       Name: !Sub '${app}-pipeline'
       ArtifactStore:
-        Location: !Ref artifactBucket
+        Location: !Ref ArtifactBucket
         Type: S3
       RoleArn: !GetAtt CodePipelineRole.Arn
       Stages:
@@ -76,6 +68,7 @@ Resources:
               Owner: !Ref githubUser
               Repo: !Ref githubRepository
               Branch: !Ref githubBranch
+              OAuthToken: '{{resolve:secretsmanager:slack-sentimentbot:SecretString:github-access-token}}'
             OutputArtifacts:
               - Name: !Sub '${app}-codebuild'
       - Name: build
@@ -90,7 +83,6 @@ Resources:
              - Name: !Sub '${app}-codebuild'
            Configuration:
              ProjectName: !Ref CodeBuild
-
   CodePipelineRole:
     Type: AWS::IAM::Role
     Properties:
@@ -115,9 +107,9 @@ Resources:
                   - 's3:GetObjectVersion'
                   - 's3:PutObject'
                 Resource:
-                  - !Sub 'arn:aws:s3:::${artifactBucket}/*'
-                  - !Sub 'arn:aws:s3:::${artifactBucket}/${app}/*'
-                  - !Sub 'arn:aws:s3:::${serverlessBucket}/*'
+                  - !Sub 'arn:aws:s3:::${ArtifactBucket}/*'
+                  - !Sub 'arn:aws:s3:::${ArtifactBucket}/${app}/*'
+                  - !Sub 'arn:aws:s3:::${ServerlessBucket}/*'
         - PolicyName: logs
           PolicyDocument:
             Version: 2012-10-17
@@ -163,9 +155,9 @@ Resources:
                   - 's3:GetObjectVersion'
                   - 's3:PutObject'
                 Resource:
-                  - !Sub 'arn:aws:s3:::${artifactBucket}/*'
-                  - !Sub 'arn:aws:s3:::${artifactBucket}/${app}/*'
-                  - !Sub 'arn:aws:s3:::${serverlessBucket}/*'
+                  - !Sub 'arn:aws:s3:::${ArtifactBucket}/*'
+                  - !Sub 'arn:aws:s3:::${ArtifactBucket}/${app}/*'
+                  - !Sub 'arn:aws:s3:::${ServerlessBucket}/*'
         - PolicyName: logs
           PolicyDocument:
             Version: 2012-10-17
