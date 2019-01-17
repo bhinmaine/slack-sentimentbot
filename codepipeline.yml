@@ -1,0 +1,199 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: slack sentiment bot
+Parameters:
+
+  artifactBucket:
+    Description: artifact bucket
+    Default: 'slack-sentimentbot-artifacts'
+    Type: String
+
+  serverlessBucket:
+    Description: serverless artifact bucket
+    Default: 'slack-sentimentbot-serverless'
+    Type: String
+
+  app:
+    Description: app name
+    Default: 'slack-sentimentbot'
+    Type: String
+
+  githubUser:
+    Description: github user
+    Default: 'possiblyben'
+    Type: String
+
+  githubRepository:
+    Description: repo
+    Default: 'slack-sentimentbot'
+    Type: String
+
+  githubBranch:
+    Description: branch
+    Default: 'master'
+    Type: String
+
+Resources:
+
+  CodeBuild:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Name: !Sub '${app}-codebuild'
+      Description: !Sub 'Build project for ${app}'
+      ServiceRole: !Ref CodeBuildRole
+      Source:
+        Auth:
+          Type: OAUTH
+        Location: !Sub 'https://github.com/${githubUser}/${githubRepository}.git'
+        Type: GITHUB
+        BuildSpec: buildspec.yml
+      TimeoutInMinutes: 10
+      Environment:
+         ComputeType: BUILD_GENERAL1_SMALL
+         Image: aws/codebuild/docker:18.09.0
+         Type: LINUX_CONTAINER
+         PrivilegedMode: true
+      Artifacts:
+       Type: no_artifacts
+
+  CodePipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      Name: !Sub '${app}-pipeline'
+      ArtifactStore:
+        Location: !Ref artifactBucket
+        Type: S3
+      RoleArn: !GetAtt CodePipelineRole.Arn
+      Stages:
+      - Name: source-from-git
+        Actions:
+          - Name: source-from-git
+            ActionTypeId:
+              Category: Source
+              Owner: ThirdParty
+              Provider: GitHub
+              Version: 1
+            Configuration:
+              Owner: !Ref githubUser
+              Repo: !Ref githubRepository
+              Branch: !Ref githubBranch
+            OutputArtifacts:
+              - Name: !Sub '${app}-codebuild'
+      - Name: build
+        Actions:
+         - Name: build
+           ActionTypeId:
+             Category: Build
+             Owner: AWS
+             Version: 1
+             Provider: CodeBuild
+           InputArtifacts:
+             - Name: !Sub '${app}-codebuild'
+           Configuration:
+             ProjectName: !Ref CodeBuild
+
+  CodePipelineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+          Version: 2012-10-17
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - 'codepipeline.amazonaws.com'
+              Action:
+                - 'sts:AssumeRole'
+      Path: '/'
+      Policies:
+        - PolicyName: s3-access
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:GetObject'
+                  - 's3:GetObjectVersion'
+                  - 's3:PutObject'
+                Resource:
+                  - !Sub 'arn:aws:s3:::${artifactBucket}/*'
+                  - !Sub 'arn:aws:s3:::${artifactBucket}/${app}/*'
+                  - !Sub 'arn:aws:s3:::${serverlessBucket}/*'
+        - PolicyName: logs
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource:
+                  - '*'
+        - PolicyName: codebuild
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'codebuild:StartBuild'
+                  - 'codebuild:BatchGetBuilds'
+                Resource:
+                  - '*'
+  CodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+          Version: 2012-10-17
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - 'codebuild.amazonaws.com'
+              Action:
+                - 'sts:AssumeRole'
+      Path: '/'
+      Policies:
+        - PolicyName: s3-access
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:GetObject'
+                  - 's3:GetObjectVersion'
+                  - 's3:PutObject'
+                Resource:
+                  - !Sub 'arn:aws:s3:::${artifactBucket}/*'
+                  - !Sub 'arn:aws:s3:::${artifactBucket}/${app}/*'
+                  - !Sub 'arn:aws:s3:::${serverlessBucket}/*'
+        - PolicyName: logs
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'logs:CreateLogGroup'
+                  - 'logs:CreateLogStream'
+                  - 'logs:PutLogEvents'
+                Resource:
+                  - '*'
+        - PolicyName: deploy
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'cloudformation:CreateStack'
+                  - 'cloudformation:DeleteStack'
+                  - 'cloudformation:DescribeStacks'
+                  - 'cloudformation:UpdateStack'
+                  - 'cloudformation:CreateChangeSet'
+                  - 'cloudformation:DeleteChangeSet'
+                  - 'cloudformation:DescribeChangeSet'
+                  - 'cloudformation:ExecuteChangeSet'
+                  - 'cloudformation:SetStackPolicy'
+                  - 'cloudformation:ValidateTemplate'
+                  - 'cloudformation:DescribeStackResource'
+                  - 'iam:PassRole'
+                Resource:
+                  - '*'
