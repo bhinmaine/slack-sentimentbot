@@ -169,6 +169,15 @@ Resources:
                   - 'logs:PutLogEvents'
                 Resource:
                   - '*'
+        - PolicyName: ssm
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'ssm:GetParameter'
+                Resource:
+                  - 'arn:aws:ssm:*:*:parameter/bot_token'
         - PolicyName: deploy
           PolicyDocument:
             Version: 2012-10-17
@@ -186,6 +195,7 @@ Resources:
                   - 'cloudformation:SetStackPolicy'
                   - 'cloudformation:ValidateTemplate'
                   - 'cloudformation:DescribeStackResource'
+                  - 'cloudformation:DescribeStackEvents'
                   - 'iam:PassRole'
                 Resource:
                   - '*'
