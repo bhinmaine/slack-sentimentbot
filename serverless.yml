@@ -41,7 +41,7 @@ plugins:
   - serverless-python-requirements
 custom:
   pythonRequirements:
-    dockerizePip: non-linux
+    dockerizePip: true
 resources:
   Resources:
     SentimentsTrackerDynamoDbTable:
