@@ -26,6 +26,20 @@ Resources:
     Type: AWS::S3::Bucket
   ArtifactBucket:
     Type: AWS::S3::Bucket
+  ServerlessBucketParameter:
+    Type: "AWS::SSM::Parameter"
+    Properties:
+      Description: Location of the Serverless Bucket
+      Name: slack-sentimentbot-ServerlessBucketLocation
+      Type: String
+      Value: ${ServerlessBucket}
+  ArtifactBucketParameter:
+    Type: "AWS::SSM::Parameter"
+    Properties:
+      Description: Location of the Artifact Bucket
+      Name: slack-sentimentbot-ArtifactBucketLocation
+      Type: String
+      Value: ${ArtifactBucket}
   CodeBuild:
     Type: AWS::CodeBuild::Project
     Properties:
@@ -177,7 +191,7 @@ Resources:
                 Action:
                   - 'ssm:GetParameter'
                 Resource:
-                  - 'arn:aws:ssm:*:*:parameter/bot_token'
+                  - 'arn:aws:ssm:*:*:parameter/*'
         - PolicyName: deploy
           PolicyDocument:
             Version: 2012-10-17

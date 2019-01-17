@@ -7,6 +7,8 @@ provider:
   region: us-east-1
   runtime: python3.7
   timeout: 60
+  deploymentBucket:
+    name: ${ssm:slack-sentimentbot-ServerlessBucketLocation}
   environment:
     BOT_TOKEN: ${ssm:bot_token}
     SENTIMENTS_TRACKER_TABLE: sentiments_tracker
