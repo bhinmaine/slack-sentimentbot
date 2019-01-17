@@ -24,22 +24,9 @@ Parameters:
 Resources:
   ServerlessBucket:
     Type: AWS::S3::Bucket
+    Name: "slack-sentimentbot-serverless"
   ArtifactBucket:
     Type: AWS::S3::Bucket
-  ServerlessBucketParameter:
-    Type: "AWS::SSM::Parameter"
-    Properties:
-      Description: Location of the Serverless Bucket
-      Name: slack-sentimentbot-ServerlessBucketLocation
-      Type: String
-      Value: ${ServerlessBucket}
-  ArtifactBucketParameter:
-    Type: "AWS::SSM::Parameter"
-    Properties:
-      Description: Location of the Artifact Bucket
-      Name: slack-sentimentbot-ArtifactBucketLocation
-      Type: String
-      Value: ${ArtifactBucket}
   CodeBuild:
     Type: AWS::CodeBuild::Project
     Properties:
