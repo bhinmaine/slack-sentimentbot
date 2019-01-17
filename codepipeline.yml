@@ -25,7 +25,7 @@ Resources:
   ServerlessBucket:
     Type: AWS::S3::Bucket
     Properties:
-      Name: "slack-sentimentbot-serverless"
+      BucketName: "slack-sentimentbot-serverless"
   ArtifactBucket:
     Type: AWS::S3::Bucket
   CodeBuild:
@@ -146,58 +146,4 @@ Resources:
               Action:
                 - 'sts:AssumeRole'
       Path: '/'
-      Policies:
-        - PolicyName: s3-access
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - 's3:GetObject'
-                  - 's3:GetObjectVersion'
-                  - 's3:PutObject'
-                Resource:
-                  - !Sub 'arn:aws:s3:::${ArtifactBucket}/*'
-                  - !Sub 'arn:aws:s3:::${ArtifactBucket}/${app}/*'
-                  - !Sub 'arn:aws:s3:::${ServerlessBucket}/*'
-        - PolicyName: logs
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - 'logs:CreateLogGroup'
-                  - 'logs:CreateLogStream'
-                  - 'logs:PutLogEvents'
-                Resource:
-                  - '*'
-        - PolicyName: ssm
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - 'ssm:GetParameter'
-                Resource:
-                  - 'arn:aws:ssm:*:*:parameter/*'
-        - PolicyName: deploy
-          PolicyDocument:
-            Version: 2012-10-17
-            Statement:
-              - Effect: Allow
-                Action:
-                  - 'cloudformation:CreateStack'
-                  - 'cloudformation:DeleteStack'
-                  - 'cloudformation:DescribeStacks'
-                  - 'cloudformation:UpdateStack'
-                  - 'cloudformation:CreateChangeSet'
-                  - 'cloudformation:DeleteChangeSet'
-                  - 'cloudformation:DescribeChangeSet'
-                  - 'cloudformation:ExecuteChangeSet'
-                  - 'cloudformation:SetStackPolicy'
-                  - 'cloudformation:ValidateTemplate'
-                  - 'cloudformation:DescribeStackResource'
-                  - 'cloudformation:DescribeStackEvents'
-                  - 'iam:PassRole'
-                Resource:
-                  - '*'
+      ManagedPolicyArns: [ "arn:aws:iam::aws:policy/AdministratorAccess" ]
