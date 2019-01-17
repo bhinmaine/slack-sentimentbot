@@ -6,6 +6,6 @@ phases:
       - apt-get install -y nodejs
       - npm install
       - npm install -g serverless
-  building:
+  build:
     commands:
       - serverless deploy --stage dev | tee deploy.out
