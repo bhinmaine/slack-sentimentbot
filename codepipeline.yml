@@ -24,7 +24,8 @@ Parameters:
 Resources:
   ServerlessBucket:
     Type: AWS::S3::Bucket
-    Name: "slack-sentimentbot-serverless"
+    Properties:
+      Name: "slack-sentimentbot-serverless"
   ArtifactBucket:
     Type: AWS::S3::Bucket
   CodeBuild:
